@@ -1,9 +1,8 @@
 import * as core from '@actions/core'
 import * as github from "@actions/github";
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { spawn } from 'child_process';
 
-const execAsync = promisify(exec);
+
 
 let repoShas: string[] | undefined;
 
@@ -12,10 +11,20 @@ const verifyCommit =  async (sha: string): Promise<boolean> => {
         try {
             const cmd = `git log --format=format:%H`;
             core.info(`Getting list of SHAs in repo via command "${cmd}"`);
-
-            const { stdout } = await execAsync(cmd,{maxBuffer: 1024 * 500});
-
-            repoShas = stdout.trim().split('\n');
+            const log = spawn('git', ['log', '--format=format:%H']);
+            log.stdout.on('data', (data) => {
+                core.info(`stdout: ${data}`);
+                repoShas = data.toString().split('\n');
+            }
+            );
+            log.stderr.on('data', (data) => {
+                core.info(`stderr: ${data}`);
+            }
+            );
+            log.on('close', (code) => {
+                core.info(`child process exited with code ${code}`);
+            }
+            );
         } catch (e) {
             repoShas = [];
             core.warning(`Error while attempting to get list of SHAs: ${e.message}`);
@@ -25,8 +34,13 @@ const verifyCommit =  async (sha: string): Promise<boolean> => {
     }
 
     core.info(`Looking for SHA ${sha} in repo SHAs`);
-
-    return repoShas.includes(sha);
+    if (repoShas != undefined && repoShas.includes(sha)) {
+        core.info(`SHA ${sha} found in repo SHAs`);
+        return true;
+    }else {
+        core.info(`SHA ${sha} not found in repo SHAs`);
+        return false;
+    }
 }
 
 async function run(): Promise<void> {

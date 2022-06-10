@@ -6063,8 +6063,6 @@ var core = __nccwpck_require__(186);
 var github = __nccwpck_require__(438);
 ;// CONCATENATED MODULE: external "child_process"
 const external_child_process_namespaceObject = require("child_process");;
-// EXTERNAL MODULE: external "util"
-var external_util_ = __nccwpck_require__(669);
 ;// CONCATENATED MODULE: ./src/main.ts
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -6078,16 +6076,23 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 
-
-const execAsync = (0,external_util_.promisify)(external_child_process_namespaceObject.exec);
 let repoShas;
 const verifyCommit = (sha) => __awaiter(void 0, void 0, void 0, function* () {
     if (!repoShas) {
         try {
             const cmd = `git log --format=format:%H`;
             core.info(`Getting list of SHAs in repo via command "${cmd}"`);
-            const { stdout } = yield execAsync(cmd, { maxBuffer: 1024 * 500 });
-            repoShas = stdout.trim().split('\n');
+            const log = (0,external_child_process_namespaceObject.spawn)('git', ['log', '--format=format:%H']);
+            log.stdout.on('data', (data) => {
+                core.info(`stdout: ${data}`);
+                repoShas = data.toString().split('\n');
+            });
+            log.stderr.on('data', (data) => {
+                core.info(`stderr: ${data}`);
+            });
+            log.on('close', (code) => {
+                core.info(`child process exited with code ${code}`);
+            });
         }
         catch (e) {
             repoShas = [];
@@ -6096,7 +6101,14 @@ const verifyCommit = (sha) => __awaiter(void 0, void 0, void 0, function* () {
         }
     }
     core.info(`Looking for SHA ${sha} in repo SHAs`);
-    return repoShas.includes(sha);
+    if (repoShas != undefined && repoShas.includes(sha)) {
+        core.info(`SHA ${sha} found in repo SHAs`);
+        return true;
+    }
+    else {
+        core.info(`SHA ${sha} not found in repo SHAs`);
+        return false;
+    }
 });
 function run() {
     var _a;
