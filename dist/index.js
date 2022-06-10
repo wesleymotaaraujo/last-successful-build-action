@@ -6136,14 +6136,15 @@ function run() {
             const runs = response.data.workflow_runs
                 .filter(x => (!inputs.branch || x.head_branch === inputs.branch) && x.conclusion === "success")
                 .sort((r1, r2) => new Date(r2.created_at).getTime() - new Date(r1.created_at).getTime());
+            core.info(`Found ${runs.length} successful runs`);
             let triggeringSha = process.env.GITHUB_SHA;
             let sha = undefined;
             if (runs.length > 0) {
                 for (const run of runs) {
-                    core.debug(`This SHA: ${triggeringSha}`);
-                    core.debug(`Run SHA: ${run.head_sha}`);
-                    core.debug(`Run Branch: ${run.head_branch}`);
-                    core.debug(`Wanted branch: ${inputs.branch}`);
+                    core.info(`This SHA: ${triggeringSha}`);
+                    core.info(`Run SHA: ${run.head_sha}`);
+                    core.info(`Run Branch: ${run.head_branch}`);
+                    core.info(`Wanted branch: ${inputs.branch}`);
                     if (triggeringSha != run.head_sha && (!inputs.branch || run.head_branch === inputs.branch)) {
                         if (inputs.verify && !(yield verifyCommit(run.head_sha))) {
                             core.warning(`Failed to verify commit ${run.head_sha}. Skipping.`);
