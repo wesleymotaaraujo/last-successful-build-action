@@ -6036,6 +6036,35 @@ module.exports = require("zlib");;
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__nccwpck_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__nccwpck_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/make namespace object */
 /******/ 	(() => {
 /******/ 		// define __esModule on exports
@@ -6054,16 +6083,11 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be in strict mode.
 (() => {
 "use strict";
-// ESM COMPAT FLAG
 __nccwpck_require__.r(__webpack_exports__);
-
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(186);
-// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
-var github = __nccwpck_require__(438);
-;// CONCATENATED MODULE: external "child_process"
-const external_child_process_namespaceObject = require("child_process");;
-;// CONCATENATED MODULE: ./src/main.ts
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(186);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(438);
+/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_1__);
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -6075,82 +6099,43 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 };
 
 
-
-let repoShas;
-const verifyCommit = (sha) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!repoShas) {
-        try {
-            const cmd = `git log --format=format:%H`;
-            core.info(`Getting list of SHAs in repo via command "${cmd}"`);
-            const log = (0,external_child_process_namespaceObject.spawn)('git', ['log', '--format=format:%H']);
-            log.stdout.on('data', (data) => {
-                core.info(`stdout: ${data}`);
-                repoShas = data.toString().split('\n');
-            });
-            log.stderr.on('data', (data) => {
-                core.info(`stderr: ${data}`);
-            });
-            log.on('close', (code) => {
-                core.info(`child process exited with code ${code}`);
-            });
-        }
-        catch (e) {
-            repoShas = [];
-            core.warning(`Error while attempting to get list of SHAs: ${e.message}`);
-            return false;
-        }
-    }
-    core.info(`Looking for SHA ${sha} in repo SHAs`);
-    if (repoShas != undefined && repoShas.includes(sha)) {
-        core.info(`SHA ${sha} found in repo SHAs`);
-        return true;
-    }
-    else {
-        core.info(`SHA ${sha} not found in repo SHAs`);
-        return false;
-    }
-});
 function run() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const inputs = {
-                token: core.getInput("token"),
-                branch: core.getInput("branch"),
-                workflow: core.getInput("workflow"),
-                verify: core.getInput('verify')
+                token: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("token"),
+                branch: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("branch"),
+                workflow: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("workflow"),
+                verify: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('verify')
             };
-            const octokit = github.getOctokit(inputs.token);
+            const octokit = _actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit(inputs.token);
             const repository = process.env.GITHUB_REPOSITORY;
             const [owner, repo] = repository.split("/");
             const workflows = yield octokit.actions.listRepoWorkflows({ owner, repo });
             const workflowId = (_a = workflows.data.workflows.find(w => w.name === inputs.workflow)) === null || _a === void 0 ? void 0 : _a.id;
             if (!workflowId) {
-                core.setFailed(`No workflow exists with the name "${inputs.workflow}"`);
+                _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(`No workflow exists with the name "${inputs.workflow}"`);
                 return;
             }
             else {
-                core.info(`Discovered workflowId for search: ${workflowId}`);
+                _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Discovered workflowId for search: ${workflowId}`);
             }
             const response = yield octokit.actions.listWorkflowRuns({ owner, repo, workflow_id: workflowId, per_page: 100 });
             const runs = response.data.workflow_runs
                 .filter(x => (!inputs.branch || x.head_branch === inputs.branch) && x.conclusion === "success")
                 .sort((r1, r2) => new Date(r2.created_at).getTime() - new Date(r1.created_at).getTime());
-            core.info(`Found ${runs.length} successful runs`);
+            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Found ${runs.length} successful runs`);
             let triggeringSha = process.env.GITHUB_SHA;
             let sha = undefined;
             if (runs.length > 0) {
                 for (const run of runs) {
-                    core.info(`This SHA: ${triggeringSha}`);
-                    core.info(`Run SHA: ${run.head_sha}`);
-                    core.info(`Run Branch: ${run.head_branch}`);
-                    core.info(`Wanted branch: ${inputs.branch}`);
+                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`This SHA: ${triggeringSha}`);
+                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Run SHA: ${run.head_sha}`);
+                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Run Branch: ${run.head_branch}`);
+                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Wanted branch: ${inputs.branch}`);
                     if (triggeringSha != run.head_sha && (!inputs.branch || run.head_branch === inputs.branch)) {
-                        if (inputs.verify && !(yield verifyCommit(run.head_sha))) {
-                            core.warning(`Failed to verify commit ${run.head_sha}. Skipping.`);
-                            continue;
-                        }
-                        core.info(inputs.verify
+                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(inputs.verify
                             ? `Commit ${run.head_sha} from run ${run.html_url} verified as last successful CI run.`
                             : `Using ${run.head_sha} from run ${run.html_url} as last successful CI run.`);
                         sha = run.head_sha;
@@ -6159,16 +6144,16 @@ function run() {
                 }
             }
             else {
-                core.info(`No previous runs found for branch ${inputs.branch}.`);
+                _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`No previous runs found for branch ${inputs.branch}.`);
             }
             if (!sha) {
-                core.warning("Unable to determine SHA of last successful commit. Using SHA for current commit.");
+                _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning("Unable to determine SHA of last successful commit. Using SHA for current commit.");
                 sha = triggeringSha;
             }
-            core.setOutput('sha', sha);
+            _actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput('sha', sha);
         }
         catch (error) {
-            core.setFailed(error.message);
+            _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(error.message);
         }
     });
 }

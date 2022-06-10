@@ -1,47 +1,5 @@
 import * as core from '@actions/core'
 import * as github from "@actions/github";
-import { spawn } from 'child_process';
-
-
-
-let repoShas: string[] | undefined;
-
-const verifyCommit =  async (sha: string): Promise<boolean> => {
-    if (!repoShas) {
-        try {
-            const cmd = `git log --format=format:%H`;
-            core.info(`Getting list of SHAs in repo via command "${cmd}"`);
-            const log = spawn('git', ['log', '--format=format:%H']);
-            log.stdout.on('data', (data) => {
-                core.info(`stdout: ${data}`);
-                repoShas = data.toString().split('\n');
-            }
-            );
-            log.stderr.on('data', (data) => {
-                core.info(`stderr: ${data}`);
-            }
-            );
-            log.on('close', (code) => {
-                core.info(`child process exited with code ${code}`);
-            }
-            );
-        } catch (e) {
-            repoShas = [];
-            core.warning(`Error while attempting to get list of SHAs: ${e.message}`);
-
-            return false;
-        }
-    }
-
-    core.info(`Looking for SHA ${sha} in repo SHAs`);
-    if (repoShas != undefined && repoShas.includes(sha)) {
-        core.info(`SHA ${sha} found in repo SHAs`);
-        return true;
-    }else {
-        core.info(`SHA ${sha} not found in repo SHAs`);
-        return false;
-    }
-}
 
 async function run(): Promise<void> {
     try {
@@ -84,18 +42,12 @@ async function run(): Promise<void> {
                 core.info(`Wanted branch: ${inputs.branch}`);
 
                 if (triggeringSha != run.head_sha && (!inputs.branch || run.head_branch === inputs.branch)) {
-                    if (inputs.verify && !await verifyCommit(run.head_sha)) {
-                        core.warning(`Failed to verify commit ${run.head_sha}. Skipping.`);
-                        continue;
-                    }
-
                     core.info(
                       inputs.verify
                       ? `Commit ${run.head_sha} from run ${run.html_url} verified as last successful CI run.`
                       : `Using ${run.head_sha} from run ${run.html_url} as last successful CI run.`
                     );
                     sha = run.head_sha;
-
                     break;
                 }
             }
