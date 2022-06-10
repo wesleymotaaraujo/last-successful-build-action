@@ -13,7 +13,7 @@ const verifyCommit =  async (sha: string): Promise<boolean> => {
             const cmd = `git log --format=format:%H`;
             core.info(`Getting list of SHAs in repo via command "${cmd}"`);
 
-            const { stdout } = await execAsync(cmd);
+            const { stdout } = await execAsync(cmd,{maxBuffer: 1024 * 500});
 
             repoShas = stdout.trim().split('\n');
         } catch (e) {
