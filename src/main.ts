@@ -25,7 +25,7 @@ async function run(): Promise<void> {
         const workflowId = workflows.data.workflows.find(w => w.name === inputs.workflow)?.id;
         core.info(`workflowId: ${workflowId}`);
 
-        if (!workflowId) {
+        if (!workflowId) { 
             core.setFailed(`No workflow exists with the name "${inputs.workflow}"`);
             return;
         } else {
