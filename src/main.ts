@@ -34,7 +34,7 @@ async function run(): Promise<void> {
 
         const response = await octokit.actions.listWorkflowRuns({ owner, repo, workflow_id: workflowId, per_page: 500 });
         core.info(`response: ${JSON.stringify(response)}`);
-        
+
         const runs = response.data.workflow_runs
             .filter(x => (!inputs.branch || x.head_branch === inputs.branch) && x.conclusion === "success")
             .sort((r1, r2) => new Date(r2.created_at).getTime() - new Date(r1.created_at).getTime());
